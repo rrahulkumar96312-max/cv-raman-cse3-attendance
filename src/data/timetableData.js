@@ -553,16 +553,15 @@ export const INITIAL_STUDENTS = [
   { roll: "F24045030", name: "Vikash Kumar Nayak", group: "GR2" },
 ];
 
-// Preloaded realistic baseline counts for personal student attendance
-// so the user immediately sees rich metrics upon launching
+// Fresh clean initial baseline for a new user
 export const DEFAULT_PERSONAL_STATS = {
-  "CSEPC-201": { attended: 26, total: 32 }, // 81.25% - Safe
-  "CSEPC-203": { attended: 24, total: 31 }, // 77.4% - Safe
-  "CSEPC-205": { attended: 27, total: 33 }, // 81.8% - Safe
-  "CSEPC-207": { attended: 22, total: 32 }, // 68.75% - Warning (<75%)
-  "CSEPC-209": { attended: 25, total: 30 }, // 83.33% - Safe
-  "CSEPC-211": { attended: 36, total: 40 }, // 90.0% - Excellent
-  "CSEPC-213": { attended: 34, total: 40 }, // 85.0% - Good
-  "CSEPC-215": { attended: 32, total: 40 }, // 80.0% - Good
-  "CSEPC-217": { attended: 29, total: 38 }, // 76.3% - Borderline
+  "CSEPC-201": { attended: 0, total: 0 },
+  "CSEPC-203": { attended: 0, total: 0 },
+  "CSEPC-205": { attended: 0, total: 0 },
+  "CSEPC-207": { attended: 0, total: 0 },
+  "CSEPC-209": { attended: 0, total: 0 },
+  "CSEPC-211": { attended: 0, total: 0 },
+  "CSEPC-213": { attended: 0, total: 0 },
+  "CSEPC-215": { attended: 0, total: 0 },
+  "CSEPC-217": { attended: 0, total: 0 },
 };

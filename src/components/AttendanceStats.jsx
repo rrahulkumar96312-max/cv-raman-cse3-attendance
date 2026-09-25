@@ -39,7 +39,7 @@ export const AttendanceStats = ({
   });
 
   const overallPercent = calculatePercentage(totalAttended, totalConducted);
-  const overallMeta = getStatusCategory(overallPercent);
+  const overallMeta = getStatusCategory(overallPercent, totalConducted);
   const overallSafeBunks = getSafeBunks(totalAttended, totalConducted, targetPercentage);
   const overallCatchup = getRequiredCatchup(totalAttended, totalConducted, targetPercentage);
 
@@ -77,7 +77,14 @@ export const AttendanceStats = ({
 
             {/* Smart Bunk / Catchup Insight */}
             <div className="pt-2">
-              {overallPercent >= targetPercentage ? (
+              {totalConducted === 0 ? (
+                <div className="flex items-center gap-2 text-zinc-400 text-sm font-medium">
+                  <Sparkles className="w-4 h-4 shrink-0 text-emerald-400" />
+                  <span>
+                    Clean Slate: No classes marked yet. Mark your first class in the 'Mark Attendance' tab or use the Steppers below to begin tracking your {targetPercentage}% compliance.
+                  </span>
+                </div>
+              ) : overallPercent >= targetPercentage ? (
                 <div className="flex items-center gap-2 text-emerald-400 text-sm font-medium">
                   <CheckCircle className="w-4 h-4 shrink-0 text-emerald-400" />
                   <span>
@@ -210,7 +217,7 @@ export const AttendanceStats = ({
         {subjectsList.map(([key, subj]) => {
           const stat = subjectStats[key] || { attended: 0, total: 0 };
           const percent = calculatePercentage(stat.attended, stat.total);
-          const meta = getStatusCategory(percent);
+          const meta = getStatusCategory(percent, stat.total);
           const safeBunks = getSafeBunks(stat.attended, stat.total, targetPercentage);
           const catchupNeeded = getRequiredCatchup(stat.attended, stat.total, targetPercentage);
 
@@ -268,7 +275,11 @@ export const AttendanceStats = ({
 
                 {/* Bunk / Catchup Insight Pill */}
                 <div className="mt-3 py-2 px-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 text-xs">
-                  {percent >= targetPercentage ? (
+                  {stat.total === 0 ? (
+                    <span className="text-zinc-500 font-medium flex items-center gap-1.5">
+                      <span>No classes recorded yet</span>
+                    </span>
+                  ) : percent >= targetPercentage ? (
                     <span className="text-emerald-400 font-medium flex items-center gap-1.5">
                       <CheckCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>Can safely bunk: <strong className="font-mono font-bold text-emerald-300">{safeBunks} class{safeBunks === 1 ? '' : 'es'}</strong></span>

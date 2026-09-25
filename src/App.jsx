@@ -33,9 +33,9 @@ export function App() {
   const initialDay = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].includes(todayCode) ? todayCode : 'MON';
   const [selectedDay, setSelectedDay] = useState(initialDay);
 
-  // 4. Persistent Subject Attendance Stats
+  // 4. Persistent Subject Attendance Stats (Fresh clean start)
   const [subjectStats, setSubjectStats] = useState(() => {
-    const saved = localStorage.getItem('cvrp_cse3_subject_stats');
+    const saved = localStorage.getItem('cvrp_cse3_clean_stats');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -46,18 +46,18 @@ export function App() {
     return DEFAULT_PERSONAL_STATS;
   });
 
-  // 5. Daily Attendance Marking Records (keyed by date and period)
+  // 5. Daily Attendance Marking Records (keyed by date and period, starts clean)
   const [attendanceRecords, setAttendanceRecords] = useState(() => {
-    const saved = localStorage.getItem('cvrp_cse3_daily_records');
+    const saved = localStorage.getItem('cvrp_cse3_clean_records');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Object.keys(parsed).length > 0) return parsed;
+        if (parsed) return parsed;
       } catch (e) {
         console.error("Failed to parse saved records", e);
       }
     }
-    return generateInitialDateRecords(userGroup);
+    return {};
   });
 
   // Save to localStorage on change
@@ -66,11 +66,11 @@ export function App() {
   }, [userGroup]);
 
   useEffect(() => {
-    localStorage.setItem('cvrp_cse3_subject_stats', JSON.stringify(subjectStats));
+    localStorage.setItem('cvrp_cse3_clean_stats', JSON.stringify(subjectStats));
   }, [subjectStats]);
 
   useEffect(() => {
-    localStorage.setItem('cvrp_cse3_daily_records', JSON.stringify(attendanceRecords));
+    localStorage.setItem('cvrp_cse3_clean_records', JSON.stringify(attendanceRecords));
   }, [attendanceRecords]);
 
   // Overall Attendance Calculation
@@ -82,7 +82,7 @@ export function App() {
     totalConducted += stat.total;
   });
   const overallPercent = calculatePercentage(totalAttended, totalConducted);
-  const statusMeta = getStatusCategory(overallPercent);
+  const statusMeta = getStatusCategory(overallPercent, totalConducted);
 
   // Trigger Confetti Celebration
   const triggerConfetti = () => {
@@ -179,9 +179,13 @@ export function App() {
   };
 
   const handleResetStats = () => {
-    if (window.confirm("Reset all subject attendance and calendar logs back to semester defaults?")) {
+    if (window.confirm("Reset all attendance and start fresh with 0 recorded classes?")) {
       setSubjectStats(DEFAULT_PERSONAL_STATS);
-      setAttendanceRecords(generateInitialDateRecords(userGroup));
+      setAttendanceRecords({});
+      localStorage.removeItem('cvrp_cse3_clean_stats');
+      localStorage.removeItem('cvrp_cse3_clean_records');
+      localStorage.removeItem('cvrp_cse3_subject_stats');
+      localStorage.removeItem('cvrp_cse3_daily_records');
     }
   };
 

@@ -30,49 +30,9 @@ export const getDayCodeForDate = (date) => {
   return mapping[date.getDay()];
 };
 
-// Generate realistic pre-populated attendance records from Semester start (01.07.2026) to late September 2026
-export const generateInitialDateRecords = (group = "GR1") => {
-  const records = {};
-  
-  // Semester starts July 1, 2026 up to September 25, 2026
-  const start = new Date(2026, 6, 1); // July 1
-  const end = new Date(2026, 8, 25);   // September 25
-
-  let current = new Date(start);
-  let seed = 42;
-  const pseudoRandom = () => {
-    seed = (seed * 9301 + 49297) % 233280;
-    return seed / 233280;
-  };
-
-  while (current <= end) {
-    const dayCode = getDayCodeForDate(current);
-    const dateStr = formatDateKey(current);
-
-    if (dayCode !== "SUN") {
-      const dayData = WEEKLY_TIMETABLE[dayCode];
-      if (dayData && dayData.periods) {
-        dayData.periods.forEach((period, idx) => {
-          if (period.type === "theory" || period.type === "lab_split") {
-            const key = `${dateStr}_period_${idx}_${group}`;
-            const rand = pseudoRandom();
-            // 82% chance present, 13% chance absent, 5% holiday
-            let status = "present";
-            if (rand > 0.87) {
-              status = "absent";
-            } else if (rand > 0.83) {
-              status = "holiday";
-            }
-            records[key] = status;
-          }
-        });
-      }
-    }
-
-    current.setDate(current.getDate() + 1);
-  }
-
-  return records;
+// Clean initial attendance records for a fresh user
+export const generateInitialDateRecords = () => {
+  return {};
 };
 
 // Compute weekly statistics for a specific week starting on Monday

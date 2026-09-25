@@ -32,7 +32,19 @@ export const getRequiredCatchup = (attended, total, targetPercent = 75) => {
   return Math.max(0, needed);
 };
 
-export const getStatusCategory = (percent) => {
+export const getStatusCategory = (percent, total = null) => {
+  if (total === 0) {
+    return {
+      label: "Fresh Session (No Classes Marked)",
+      color: "text-zinc-400",
+      bg: "bg-zinc-800/40",
+      border: "border-zinc-700/60",
+      glow: "border-zinc-700/40",
+      barColor: "bg-zinc-700",
+      status: "fresh",
+      badgeText: "Not Started",
+    };
+  }
   if (percent >= 80) {
     return {
       label: "Safe & On Track",
