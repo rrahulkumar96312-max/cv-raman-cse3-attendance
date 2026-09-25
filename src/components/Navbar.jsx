@@ -96,6 +96,18 @@ export const Navbar = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('calendar')}
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
+              activeTab === 'calendar'
+                ? 'bg-zinc-800 text-zinc-100 border border-zinc-700/60 shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+            }`}
+          >
+            <Calendar className="w-4 h-4 text-emerald-400" />
+            <span>Calendar & Summary</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('timetable')}
             className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
               activeTab === 'timetable'

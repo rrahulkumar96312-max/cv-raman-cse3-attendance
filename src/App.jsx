@@ -6,6 +6,7 @@ import { AttendanceStats } from './components/AttendanceStats';
 import { TimetableView } from './components/TimetableView';
 import { ClassRegisterCR } from './components/ClassRegisterCR';
 import { SubjectDirectory } from './components/SubjectDirectory';
+import { CalendarSummaryView } from './components/CalendarSummaryView';
 import { 
   DEFAULT_PERSONAL_STATS, 
   SUBJECTS, 
@@ -16,6 +17,7 @@ import {
   getStatusCategory, 
   getDayCodeFromDate 
 } from './utils/attendanceUtils';
+import { generateInitialDateRecords } from './utils/calendarUtils';
 
 export function App() {
   // 1. Persistent User Group (GR1 / GR2)
@@ -24,7 +26,7 @@ export function App() {
   });
 
   // 2. Active Tab
-  const [activeTab, setActiveTab] = useState('daily'); // 'daily' | 'timetable' | 'analytics' | 'roster' | 'subjects'
+  const [activeTab, setActiveTab] = useState('daily'); // 'daily' | 'calendar' | 'timetable' | 'analytics' | 'roster' | 'subjects'
 
   // 3. Current Live Day Detection
   const todayCode = getDayCodeFromDate(new Date());
@@ -44,17 +46,18 @@ export function App() {
     return DEFAULT_PERSONAL_STATS;
   });
 
-  // 5. Daily Attendance Marking Records
+  // 5. Daily Attendance Marking Records (keyed by date and period)
   const [attendanceRecords, setAttendanceRecords] = useState(() => {
     const saved = localStorage.getItem('cvrp_cse3_daily_records');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Object.keys(parsed).length > 0) return parsed;
       } catch (e) {
         console.error("Failed to parse saved records", e);
       }
     }
-    return {};
+    return generateInitialDateRecords(userGroup);
   });
 
   // Save to localStorage on change
@@ -141,7 +144,7 @@ export function App() {
     }
   };
 
-  // Handler to mark all periods for the selected day
+  // Handler to mark all periods for a given day
   const handleMarkAllToday = (dayCode, status) => {
     const dayData = WEEKLY_TIMETABLE[dayCode];
     if (!dayData) return;
@@ -176,9 +179,9 @@ export function App() {
   };
 
   const handleResetStats = () => {
-    if (window.confirm("Reset all subject attendance to standard Winter-2026 semester default values?")) {
+    if (window.confirm("Reset all subject attendance and calendar logs back to semester defaults?")) {
       setSubjectStats(DEFAULT_PERSONAL_STATS);
-      setAttendanceRecords({});
+      setAttendanceRecords(generateInitialDateRecords(userGroup));
     }
   };
 
@@ -206,6 +209,15 @@ export function App() {
             onMarkAllToday={handleMarkAllToday}
             subjectStats={subjectStats}
             currentLiveDay={todayCode}
+          />
+        )}
+
+        {activeTab === 'calendar' && (
+          <CalendarSummaryView
+            userGroup={userGroup}
+            attendanceRecords={attendanceRecords}
+            onMarkPeriod={handleMarkPeriod}
+            onMarkAllToday={handleMarkAllToday}
           />
         )}
 
