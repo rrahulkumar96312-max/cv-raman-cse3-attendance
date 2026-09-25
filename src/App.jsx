@@ -5,6 +5,7 @@ import { TodaySchedule } from './components/TodaySchedule';
 import { TimetableView } from './components/TimetableView';
 import { SubjectDirectory } from './components/SubjectDirectory';
 import { CalendarSummaryView } from './components/CalendarSummaryView';
+import { ProfileModal } from './components/ProfileModal';
 import { 
   DEFAULT_PERSONAL_STATS, 
   SUBJECTS, 
@@ -15,7 +16,6 @@ import {
   getStatusCategory, 
   getDayCodeFromDate 
 } from './utils/attendanceUtils';
-import { generateInitialDateRecords } from './utils/calendarUtils';
 
 export function App() {
   // 1. Persistent User Group (GR1 / GR2)
@@ -23,15 +23,28 @@ export function App() {
     return localStorage.getItem('cvrp_cse3_user_group') || 'GR1';
   });
 
-  // 2. Active Tab
-  const [activeTab, setActiveTab] = useState('daily'); // 'daily' | 'calendar' | 'timetable' | 'analytics' | 'roster' | 'subjects'
+  // 2. Student Identification (Name & Registration Number)
+  const [studentName, setStudentName] = useState(() => {
+    return localStorage.getItem('cvrp_student_name') || '';
+  });
+  const [regNumber, setRegNumber] = useState(() => {
+    return localStorage.getItem('cvrp_reg_number') || '';
+  });
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(() => {
+    const n = localStorage.getItem('cvrp_student_name');
+    const r = localStorage.getItem('cvrp_reg_number');
+    return !n || !r; // automatically open on first visit
+  });
 
-  // 3. Current Live Day Detection
+  // 3. Active Tab
+  const [activeTab, setActiveTab] = useState('daily'); // 'daily' | 'calendar' | 'timetable' | 'subjects'
+
+  // 4. Current Live Day Detection
   const todayCode = getDayCodeFromDate(new Date());
   const initialDay = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].includes(todayCode) ? todayCode : 'MON';
   const [selectedDay, setSelectedDay] = useState(initialDay);
 
-  // 4. Persistent Subject Attendance Stats (Fresh clean start)
+  // 5. Persistent Subject Attendance Stats (Fresh clean start)
   const [subjectStats, setSubjectStats] = useState(() => {
     const saved = localStorage.getItem('cvrp_cse3_clean_stats');
     if (saved) {
@@ -44,7 +57,7 @@ export function App() {
     return DEFAULT_PERSONAL_STATS;
   });
 
-  // 5. Daily Attendance Marking Records (keyed by date and period, starts clean)
+  // 6. Daily Attendance Marking Records (keyed by date and period, starts clean)
   const [attendanceRecords, setAttendanceRecords] = useState(() => {
     const saved = localStorage.getItem('cvrp_cse3_clean_records');
     if (saved) {
@@ -70,6 +83,14 @@ export function App() {
   useEffect(() => {
     localStorage.setItem('cvrp_cse3_clean_records', JSON.stringify(attendanceRecords));
   }, [attendanceRecords]);
+
+  const handleSaveProfile = (name, reg) => {
+    setStudentName(name);
+    setRegNumber(reg);
+    localStorage.setItem('cvrp_student_name', name);
+    localStorage.setItem('cvrp_reg_number', reg);
+    setIsProfileModalOpen(false);
+  };
 
   // Overall Attendance Calculation
   let totalAttended = 0;
@@ -163,33 +184,9 @@ export function App() {
     }
   };
 
-  // Direct adjustment from Bunk Planner
-  const handleUpdateStats = (subjectKey, addAttended, addTotal) => {
-    setSubjectStats((prev) => {
-      const current = prev[subjectKey] || { attended: 0, total: 0 };
-      const newAttended = Math.max(0, current.attended + addAttended);
-      const newTotal = Math.max(0, current.total + addTotal);
-      return {
-        ...prev,
-        [subjectKey]: { attended: newAttended, total: newTotal }
-      };
-    });
-  };
-
-  const handleResetStats = () => {
-    if (window.confirm("Reset all attendance and start fresh with 0 recorded classes?")) {
-      setSubjectStats(DEFAULT_PERSONAL_STATS);
-      setAttendanceRecords({});
-      localStorage.removeItem('cvrp_cse3_clean_stats');
-      localStorage.removeItem('cvrp_cse3_clean_records');
-      localStorage.removeItem('cvrp_cse3_subject_stats');
-      localStorage.removeItem('cvrp_cse3_daily_records');
-    }
-  };
-
   return (
     <div className="min-h-[100dvh] bg-zinc-950 text-zinc-100 flex flex-col font-sans">
-      {/* Top Navbar */}
+      {/* Top Navbar with Student Name and Registration Number */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -197,6 +194,9 @@ export function App() {
         setUserGroup={setUserGroup}
         overallPercent={overallPercent}
         statusMeta={statusMeta}
+        studentName={studentName}
+        regNumber={regNumber}
+        onOpenProfileModal={() => setIsProfileModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -234,6 +234,17 @@ export function App() {
           <SubjectDirectory />
         )}
       </main>
+
+      {/* Student Identification Modal */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        initialName={studentName}
+        initialReg={regNumber}
+        userGroup={userGroup}
+        setUserGroup={setUserGroup}
+        onSave={handleSaveProfile}
+      />
 
       {/* Footer */}
       <footer className="border-t border-zinc-900 bg-zinc-950 py-6 text-center text-xs text-zinc-500 font-mono">

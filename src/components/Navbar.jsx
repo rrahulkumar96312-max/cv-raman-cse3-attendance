@@ -1,4 +1,5 @@
-import { Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import React from 'react';
+import { Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2, User, Edit3 } from 'lucide-react';
 import { COLLEGE_INFO } from '../data/timetableData';
 
 export const Navbar = ({
@@ -7,36 +8,66 @@ export const Navbar = ({
   userGroup,
   setUserGroup,
   overallPercent,
-  statusMeta
+  statusMeta,
+  studentName,
+  regNumber,
+  onOpenProfileModal
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/85 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
           
-          {/* Brand & Polytechnic Header */}
+          {/* User Name & Registration Number Header (Replacing college title) */}
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
-              <BookOpen className="w-5 h-5 stroke-[2]" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold text-base sm:text-lg tracking-tight text-zinc-100 truncate">
-                  {COLLEGE_INFO.name}
-                </span>
-                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  {COLLEGE_INFO.session}
-                </span>
-                <span className="hidden md:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono text-zinc-400 border border-zinc-800">
-                  Room {COLLEGE_INFO.defaultRoom}
-                </span>
+            {studentName ? (
+              <div 
+                onClick={onOpenProfileModal}
+                className="flex items-center gap-3 min-w-0 cursor-pointer group"
+                title="Click to edit Name or Registration Number"
+              >
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold font-mono text-base shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                  {studentName.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-bold text-base sm:text-lg tracking-tight text-zinc-100 truncate group-hover:text-emerald-400 transition-colors">
+                      {studentName}
+                    </span>
+                    <span className="p-0.5 text-zinc-500 group-hover:text-zinc-300 transition-colors">
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 truncate flex items-center gap-1.5 font-mono">
+                    <span className="text-emerald-400 font-semibold">{regNumber}</span>
+                    <span className="text-zinc-600">•</span>
+                    <span className="text-zinc-400 font-sans">3rd Sem CSE</span>
+                  </p>
+                </div>
               </div>
-              <p className="text-xs text-zinc-400 truncate flex items-center gap-1.5">
-                <span>{COLLEGE_INFO.semester}</span>
-                <span className="text-zinc-600">•</span>
-                <span className="text-zinc-500 hidden sm:inline">w.e.f {COLLEGE_INFO.wef}</span>
-              </p>
-            </div>
+            ) : (
+              <button 
+                type="button"
+                onClick={onOpenProfileModal}
+                className="flex items-center gap-3 text-left group cursor-pointer"
+                title="Click to set your name and registration number"
+              >
+                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-dashed border-emerald-500/50 flex items-center justify-center text-emerald-400 shrink-0 group-hover:bg-emerald-500/10 transition-colors">
+                  <User className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-sm sm:text-base text-zinc-100 group-hover:text-emerald-400 transition-colors">
+                      Enter Name & Reg No.
+                    </span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  </div>
+                  <p className="text-xs text-zinc-400 truncate font-mono">
+                    Click to register student profile
+                  </p>
+                </div>
+              </button>
+            )}
           </div>
 
           {/* Quick Group Switcher & Stats Badge */}
