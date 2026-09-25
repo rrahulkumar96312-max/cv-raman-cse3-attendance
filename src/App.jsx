@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { Navbar } from './components/Navbar';
 import { TodaySchedule } from './components/TodaySchedule';
-import { AttendanceStats } from './components/AttendanceStats';
 import { TimetableView } from './components/TimetableView';
-import { ClassRegisterCR } from './components/ClassRegisterCR';
 import { SubjectDirectory } from './components/SubjectDirectory';
 import { CalendarSummaryView } from './components/CalendarSummaryView';
 import { 
@@ -229,20 +227,6 @@ export function App() {
           <TimetableView
             userGroup={userGroup}
             setUserGroup={setUserGroup}
-          />
-        )}
-
-        {activeTab === 'analytics' && (
-          <AttendanceStats
-            subjectStats={subjectStats}
-            onUpdateStats={handleUpdateStats}
-            onResetStats={handleResetStats}
-          />
-        )}
-
-        {activeTab === 'roster' && (
-          <ClassRegisterCR
-            userGroup={userGroup}
           />
         )}
 

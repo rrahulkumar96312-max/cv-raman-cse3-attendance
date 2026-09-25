@@ -1,5 +1,4 @@
-import React from 'react';
-import { Calendar, Users, BookOpen, Clock, ShieldCheck, CheckCircle2, Award } from 'lucide-react';
+import { Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { COLLEGE_INFO } from '../data/timetableData';
 
 export const Navbar = ({
@@ -117,30 +116,6 @@ export const Navbar = ({
           >
             <Calendar className="w-4 h-4 text-sky-400" />
             <span>Weekly Timetable</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
-              activeTab === 'analytics'
-                ? 'bg-zinc-800 text-zinc-100 border border-zinc-700/60 shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
-            }`}
-          >
-            <Award className="w-4 h-4 text-amber-400" />
-            <span>75% Bunk Planner</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('roster')}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
-              activeTab === 'roster'
-                ? 'bg-zinc-800 text-zinc-100 border border-zinc-700/60 shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
-            }`}
-          >
-            <Users className="w-4 h-4 text-violet-400" />
-            <span>Batch Roll Call (CR)</span>
           </button>
 
           <button
