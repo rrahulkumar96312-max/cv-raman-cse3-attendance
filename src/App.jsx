@@ -56,6 +56,11 @@ export function App() {
   });
   const [isWorkingDaysModalOpen, setIsWorkingDaysModalOpen] = useState(false);
 
+  // 3b. Attendance Source Toggle ('calendar' | 'input')
+  const [attendanceSource, setAttendanceSource] = useState(() => {
+    return localStorage.getItem('cvrp_attendance_source') || 'calendar';
+  });
+
   // 4. Active Tab
   const [activeTab, setActiveTab] = useState('daily'); // 'daily' | 'calendar' | 'timetable' | 'subjects'
 
@@ -108,6 +113,10 @@ export function App() {
     localStorage.setItem('cvrp_working_days_data', JSON.stringify(workingDaysData));
   }, [workingDaysData]);
 
+  useEffect(() => {
+    localStorage.setItem('cvrp_attendance_source', attendanceSource);
+  }, [attendanceSource]);
+
   const handleSaveProfile = (name, reg) => {
     setStudentName(name);
     setRegNumber(reg);
@@ -126,7 +135,7 @@ export function App() {
     triggerConfetti();
   };
 
-  // Overall Class-based Attendance Calculation
+  // Overall Class-based Attendance Calculation (Calendar Data)
   let totalAttended = 0;
   let totalConducted = 0;
   Object.keys(SUBJECTS).forEach((key) => {
@@ -136,6 +145,11 @@ export function App() {
   });
   const overallPercent = calculatePercentage(totalAttended, totalConducted);
   const statusMeta = getStatusCategory(overallPercent, totalConducted);
+
+  const calendarStats = {
+    attended: totalAttended,
+    total: totalConducted
+  };
 
   // Trigger Confetti Celebration
   const triggerConfetti = () => {
@@ -220,7 +234,7 @@ export function App() {
 
   return (
     <div className="min-h-[100dvh] bg-zinc-950 text-zinc-100 flex flex-col font-sans">
-      {/* Top Navbar with Student Name, Registration Number, and Working Days Indicator */}
+      {/* Top Navbar with Student Name, Registration Number, and Dual Attendance Options */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -233,6 +247,8 @@ export function App() {
         onOpenProfileModal={() => setIsProfileModalOpen(true)}
         workingDaysData={workingDaysData}
         onOpenWorkingDaysModal={() => setIsWorkingDaysModalOpen(true)}
+        attendanceSource={attendanceSource}
+        onSelectAttendanceSource={setAttendanceSource}
       />
 
       {/* Main Content Area */}
@@ -249,6 +265,9 @@ export function App() {
             currentLiveDay={todayCode}
             workingDaysData={workingDaysData}
             onOpenWorkingDaysModal={() => setIsWorkingDaysModalOpen(true)}
+            attendanceSource={attendanceSource}
+            onSelectAttendanceSource={setAttendanceSource}
+            calendarStats={calendarStats}
           />
         )}
 
@@ -260,6 +279,9 @@ export function App() {
             onMarkAllToday={handleMarkAllToday}
             workingDaysData={workingDaysData}
             onOpenWorkingDaysModal={() => setIsWorkingDaysModalOpen(true)}
+            attendanceSource={attendanceSource}
+            onSelectAttendanceSource={setAttendanceSource}
+            calendarStats={calendarStats}
           />
         )}
 

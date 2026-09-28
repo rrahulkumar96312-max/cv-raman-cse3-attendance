@@ -29,7 +29,7 @@ import {
 } from '../utils/calendarUtils';
 import { SUBJECTS, WEEKLY_TIMETABLE } from '../data/timetableData';
 import { calculatePercentage, getStatusCategory } from '../utils/attendanceUtils';
-import { WorkingDaysCard } from './WorkingDaysCard';
+import { DualAttendanceCard } from './DualAttendanceCard';
 
 export const CalendarSummaryView = ({
   userGroup,
@@ -37,7 +37,10 @@ export const CalendarSummaryView = ({
   onMarkPeriod,
   onMarkAllToday,
   workingDaysData,
-  onOpenWorkingDaysModal
+  onOpenWorkingDaysModal,
+  attendanceSource = 'calendar',
+  onSelectAttendanceSource,
+  calendarStats
 }) => {
   // Navigation State
   const [activeSubTab, setActiveSubTab] = useState('calendar'); // 'calendar' | 'weekly' | 'monthly'
@@ -174,10 +177,13 @@ export const CalendarSummaryView = ({
         </div>
       </div>
 
-      {/* Official Working Days Attendance Card */}
-      <WorkingDaysCard 
-        workingDaysData={workingDaysData} 
-        onOpenEditModal={onOpenWorkingDaysModal} 
+      {/* Dual Attendance Options: Option 1 (Calendar Data) & Option 2 (Input Attendance) */}
+      <DualAttendanceCard
+        attendanceSource={attendanceSource}
+        onSelectSource={onSelectAttendanceSource}
+        calendarStats={calendarStats || { attended: 0, total: 0 }}
+        workingDaysData={workingDaysData}
+        onOpenEditInputModal={onOpenWorkingDaysModal}
       />
 
       {/* SUB-TAB 1: INTERACTIVE CALENDAR VIEW */}

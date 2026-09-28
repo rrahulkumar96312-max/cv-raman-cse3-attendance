@@ -14,7 +14,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { SUBJECTS, WEEKLY_TIMETABLE } from '../data/timetableData';
-import { WorkingDaysCard } from './WorkingDaysCard';
+import { DualAttendanceCard } from './DualAttendanceCard';
 
 export const TodaySchedule = ({
   selectedDay,
@@ -27,7 +27,10 @@ export const TodaySchedule = ({
   currentLiveDay,
   currentLiveSlot,
   workingDaysData,
-  onOpenWorkingDaysModal
+  onOpenWorkingDaysModal,
+  attendanceSource = 'calendar',
+  onSelectAttendanceSource,
+  calendarStats
 }) => {
   const daysOfWeek = [
     { code: "MON", label: "Mon" },
@@ -118,10 +121,13 @@ export const TodaySchedule = ({
         </div>
       </div>
 
-      {/* Official Working Days Attendance Card */}
-      <WorkingDaysCard 
-        workingDaysData={workingDaysData} 
-        onOpenEditModal={onOpenWorkingDaysModal} 
+      {/* Dual Attendance Options: Option 1 (Calendar Data) & Option 2 (Input Attendance) */}
+      <DualAttendanceCard
+        attendanceSource={attendanceSource}
+        onSelectSource={onSelectAttendanceSource}
+        calendarStats={calendarStats || { attended: 0, total: 0 }}
+        workingDaysData={workingDaysData}
+        onOpenEditInputModal={onOpenWorkingDaysModal}
       />
 
       {/* Periods List */}

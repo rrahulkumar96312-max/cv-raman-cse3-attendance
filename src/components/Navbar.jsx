@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2, User, Edit3, Percent } from 'lucide-react';
+import { Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2, User, Edit3, Percent, Pencil } from 'lucide-react';
 import { COLLEGE_INFO } from '../data/timetableData';
 import { calculatePercentage, getStatusCategory } from '../utils/attendanceUtils';
 
@@ -14,25 +14,15 @@ export const Navbar = ({
   regNumber,
   onOpenProfileModal,
   workingDaysData,
-  onOpenWorkingDaysModal
+  onOpenWorkingDaysModal,
+  attendanceSource = 'calendar',
+  onSelectAttendanceSource
 }) => {
   const hasWorkingDays = (workingDaysData?.totalDays || 0) > 0;
   const workingDaysPercent = hasWorkingDays 
     ? calculatePercentage(workingDaysData.attendedDays, workingDaysData.totalDays)
     : 0;
   const workingDaysMeta = getStatusCategory(workingDaysPercent, workingDaysData?.totalDays || 0);
-
-  const displayPercent = (workingDaysData?.useWorkingDaysAsPrimary && hasWorkingDays)
-    ? workingDaysPercent
-    : overallPercent;
-
-  const displayMeta = (workingDaysData?.useWorkingDaysAsPrimary && hasWorkingDays)
-    ? workingDaysMeta
-    : statusMeta;
-
-  const displayLabel = (workingDaysData?.useWorkingDaysAsPrimary && hasWorkingDays)
-    ? `Working Days (${workingDaysData.attendedDays}/${workingDaysData.totalDays})`
-    : `Total Attendance`;
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/85 backdrop-blur-md">
@@ -119,24 +109,52 @@ export const Navbar = ({
               </button>
             </div>
 
-            {/* Attendance Percentage Badge (Clickable to edit working days) */}
-            <button
-              type="button"
-              onClick={onOpenWorkingDaysModal}
-              className={`flex items-center gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl border ${displayMeta.bg} ${displayMeta.border} hover:border-emerald-500/50 transition-all cursor-pointer text-left shadow-sm active:scale-95`}
-              title="Click to edit Working Days or Attendance details"
-            >
-              <ShieldCheck className={`w-4 h-4 ${displayMeta.color}`} />
-              <div className="flex flex-col text-right">
-                <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 hidden sm:flex items-center gap-1 justify-end">
-                  <span>{displayLabel}</span>
-                  <Edit3 className="w-2.5 h-2.5 text-zinc-400" />
-                </span>
-                <span className={`text-xs sm:text-sm font-bold font-mono leading-none ${displayMeta.color}`}>
-                  {displayPercent}%
-                </span>
-              </div>
-            </button>
+            {/* Dual Attendance Percentage Switcher (Option 1: Calendar vs. Option 2: Input) */}
+            <div className="flex items-center bg-zinc-900/90 p-1 rounded-xl border border-zinc-800 shadow-sm">
+              {/* Option 1: Calendar Data */}
+              <button
+                type="button"
+                onClick={() => onSelectAttendanceSource?.('calendar')}
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer ${
+                  attendanceSource === 'calendar'
+                    ? `${statusMeta.bg} ${statusMeta.color} font-bold border ${statusMeta.border} shadow-sm`
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+                title="Option 1: Attendance calculated from Calendar / Schedule marks"
+              >
+                <Calendar className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden md:inline text-[11px] font-medium text-zinc-400">Cal:</span>
+                <span className="font-mono font-bold">{overallPercent}%</span>
+              </button>
+
+              <span className="text-zinc-700 mx-0.5 text-xs font-mono">|</span>
+
+              {/* Option 2: Input Attendance */}
+              <button
+                type="button"
+                onClick={() => onSelectAttendanceSource?.('input')}
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer ${
+                  attendanceSource === 'input'
+                    ? `${workingDaysMeta.bg} ${workingDaysMeta.color} font-bold border ${workingDaysMeta.border} shadow-sm`
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+                title="Option 2: Attendance from Manual College Input (Working Days slip)"
+              >
+                <Edit3 className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden md:inline text-[11px] font-medium text-zinc-400">Input:</span>
+                <span className="font-mono font-bold">{workingDaysPercent}%</span>
+              </button>
+
+              {/* Quick Pencil to Edit Working Days Numbers */}
+              <button
+                type="button"
+                onClick={onOpenWorkingDaysModal}
+                className="p-1 text-zinc-500 hover:text-emerald-400 hover:bg-zinc-800/80 rounded-md transition-colors ml-0.5 cursor-pointer"
+                title="Edit College Working Days & Attended Days"
+              >
+                <Pencil className="w-3 h-3" />
+              </button>
+            </div>
           </div>
         </div>
 
