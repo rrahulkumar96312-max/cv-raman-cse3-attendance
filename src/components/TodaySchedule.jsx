@@ -14,6 +14,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { SUBJECTS, WEEKLY_TIMETABLE } from '../data/timetableData';
+import { WorkingDaysCard } from './WorkingDaysCard';
 
 export const TodaySchedule = ({
   selectedDay,
@@ -24,7 +25,9 @@ export const TodaySchedule = ({
   onMarkAllToday,
   subjectStats,
   currentLiveDay,
-  currentLiveSlot
+  currentLiveSlot,
+  workingDaysData,
+  onOpenWorkingDaysModal
 }) => {
   const daysOfWeek = [
     { code: "MON", label: "Mon" },
@@ -114,6 +117,12 @@ export const TodaySchedule = ({
           })}
         </div>
       </div>
+
+      {/* Official Working Days Attendance Card */}
+      <WorkingDaysCard 
+        workingDaysData={workingDaysData} 
+        onOpenEditModal={onOpenWorkingDaysModal} 
+      />
 
       {/* Periods List */}
       <div className="space-y-3">

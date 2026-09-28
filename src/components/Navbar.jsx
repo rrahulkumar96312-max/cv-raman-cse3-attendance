@@ -1,6 +1,7 @@
 import React from 'react';
-import { Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2, User, Edit3 } from 'lucide-react';
+import { Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2, User, Edit3, Percent } from 'lucide-react';
 import { COLLEGE_INFO } from '../data/timetableData';
+import { calculatePercentage, getStatusCategory } from '../utils/attendanceUtils';
 
 export const Navbar = ({
   activeTab,
@@ -11,8 +12,28 @@ export const Navbar = ({
   statusMeta,
   studentName,
   regNumber,
-  onOpenProfileModal
+  onOpenProfileModal,
+  workingDaysData,
+  onOpenWorkingDaysModal
 }) => {
+  const hasWorkingDays = (workingDaysData?.totalDays || 0) > 0;
+  const workingDaysPercent = hasWorkingDays 
+    ? calculatePercentage(workingDaysData.attendedDays, workingDaysData.totalDays)
+    : 0;
+  const workingDaysMeta = getStatusCategory(workingDaysPercent, workingDaysData?.totalDays || 0);
+
+  const displayPercent = (workingDaysData?.useWorkingDaysAsPrimary && hasWorkingDays)
+    ? workingDaysPercent
+    : overallPercent;
+
+  const displayMeta = (workingDaysData?.useWorkingDaysAsPrimary && hasWorkingDays)
+    ? workingDaysMeta
+    : statusMeta;
+
+  const displayLabel = (workingDaysData?.useWorkingDaysAsPrimary && hasWorkingDays)
+    ? `Working Days (${workingDaysData.attendedDays}/${workingDaysData.totalDays})`
+    : `Total Attendance`;
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/85 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -71,13 +92,13 @@ export const Navbar = ({
           </div>
 
           {/* Quick Group Switcher & Stats Badge */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             {/* Group Toggle */}
             <div className="flex items-center bg-zinc-900/90 p-1 rounded-xl border border-zinc-800">
               <button
                 type="button"
                 onClick={() => setUserGroup("GR1")}
-                className={`px-2.5 sm:px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                className={`px-2.5 sm:px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                   userGroup === "GR1"
                     ? "bg-emerald-500 text-zinc-950 shadow-sm"
                     : "text-zinc-400 hover:text-zinc-200"
@@ -88,7 +109,7 @@ export const Navbar = ({
               <button
                 type="button"
                 onClick={() => setUserGroup("GR2")}
-                className={`px-2.5 sm:px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                className={`px-2.5 sm:px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                   userGroup === "GR2"
                     ? "bg-emerald-500 text-zinc-950 shadow-sm"
                     : "text-zinc-400 hover:text-zinc-200"
@@ -98,16 +119,24 @@ export const Navbar = ({
               </button>
             </div>
 
-            {/* Attendance Percentage Badge */}
-            <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border ${statusMeta.bg} ${statusMeta.border}`}>
-              <ShieldCheck className={`w-4 h-4 ${statusMeta.color}`} />
+            {/* Attendance Percentage Badge (Clickable to edit working days) */}
+            <button
+              type="button"
+              onClick={onOpenWorkingDaysModal}
+              className={`flex items-center gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl border ${displayMeta.bg} ${displayMeta.border} hover:border-emerald-500/50 transition-all cursor-pointer text-left shadow-sm active:scale-95`}
+              title="Click to edit Working Days or Attendance details"
+            >
+              <ShieldCheck className={`w-4 h-4 ${displayMeta.color}`} />
               <div className="flex flex-col text-right">
-                <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400">Total Attendance</span>
-                <span className={`text-sm font-bold font-mono leading-none ${statusMeta.color}`}>
-                  {overallPercent}%
+                <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 hidden sm:flex items-center gap-1 justify-end">
+                  <span>{displayLabel}</span>
+                  <Edit3 className="w-2.5 h-2.5 text-zinc-400" />
+                </span>
+                <span className={`text-xs sm:text-sm font-bold font-mono leading-none ${displayMeta.color}`}>
+                  {displayPercent}%
                 </span>
               </div>
-            </div>
+            </button>
           </div>
         </div>
 
@@ -115,7 +144,7 @@ export const Navbar = ({
         <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto py-2 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar border-t border-zinc-900/80">
           <button
             onClick={() => setActiveTab('daily')}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'daily'
                 ? 'bg-zinc-800 text-zinc-100 border border-zinc-700/60 shadow-sm'
                 : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
@@ -127,7 +156,7 @@ export const Navbar = ({
 
           <button
             onClick={() => setActiveTab('calendar')}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'calendar'
                 ? 'bg-zinc-800 text-zinc-100 border border-zinc-700/60 shadow-sm'
                 : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
@@ -139,7 +168,7 @@ export const Navbar = ({
 
           <button
             onClick={() => setActiveTab('timetable')}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'timetable'
                 ? 'bg-zinc-800 text-zinc-100 border border-zinc-700/60 shadow-sm'
                 : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
@@ -151,7 +180,7 @@ export const Navbar = ({
 
           <button
             onClick={() => setActiveTab('subjects')}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'subjects'
                 ? 'bg-zinc-800 text-zinc-100 border border-zinc-700/60 shadow-sm'
                 : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'

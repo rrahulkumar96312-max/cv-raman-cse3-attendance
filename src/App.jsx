@@ -6,6 +6,7 @@ import { TimetableView } from './components/TimetableView';
 import { SubjectDirectory } from './components/SubjectDirectory';
 import { CalendarSummaryView } from './components/CalendarSummaryView';
 import { ProfileModal } from './components/ProfileModal';
+import { WorkingDaysModal } from './components/WorkingDaysModal';
 import { 
   DEFAULT_PERSONAL_STATS, 
   SUBJECTS, 
@@ -36,15 +37,34 @@ export function App() {
     return !n || !r; // automatically open on first visit
   });
 
-  // 3. Active Tab
+  // 3. Official Working Days & Attendance Detail
+  const [workingDaysData, setWorkingDaysData] = useState(() => {
+    const saved = localStorage.getItem('cvrp_working_days_data');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse working days data", e);
+      }
+    }
+    return {
+      totalDays: 0,
+      attendedDays: 0,
+      semesterTargetDays: 90,
+      useWorkingDaysAsPrimary: true
+    };
+  });
+  const [isWorkingDaysModalOpen, setIsWorkingDaysModalOpen] = useState(false);
+
+  // 4. Active Tab
   const [activeTab, setActiveTab] = useState('daily'); // 'daily' | 'calendar' | 'timetable' | 'subjects'
 
-  // 4. Current Live Day Detection
+  // 5. Current Live Day Detection
   const todayCode = getDayCodeFromDate(new Date());
   const initialDay = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].includes(todayCode) ? todayCode : 'MON';
   const [selectedDay, setSelectedDay] = useState(initialDay);
 
-  // 5. Persistent Subject Attendance Stats (Fresh clean start)
+  // 6. Persistent Subject Attendance Stats (Fresh clean start)
   const [subjectStats, setSubjectStats] = useState(() => {
     const saved = localStorage.getItem('cvrp_cse3_clean_stats');
     if (saved) {
@@ -57,7 +77,7 @@ export function App() {
     return DEFAULT_PERSONAL_STATS;
   });
 
-  // 6. Daily Attendance Marking Records (keyed by date and period, starts clean)
+  // 7. Daily Attendance Marking Records (keyed by date and period, starts clean)
   const [attendanceRecords, setAttendanceRecords] = useState(() => {
     const saved = localStorage.getItem('cvrp_cse3_clean_records');
     if (saved) {
@@ -84,6 +104,10 @@ export function App() {
     localStorage.setItem('cvrp_cse3_clean_records', JSON.stringify(attendanceRecords));
   }, [attendanceRecords]);
 
+  useEffect(() => {
+    localStorage.setItem('cvrp_working_days_data', JSON.stringify(workingDaysData));
+  }, [workingDaysData]);
+
   const handleSaveProfile = (name, reg) => {
     setStudentName(name);
     setRegNumber(reg);
@@ -92,7 +116,17 @@ export function App() {
     setIsProfileModalOpen(false);
   };
 
-  // Overall Attendance Calculation
+  const handleSaveWorkingDays = (newData) => {
+    setWorkingDaysData(newData);
+    triggerConfetti();
+  };
+
+  const handleSaveSubjectStats = (newStats) => {
+    setSubjectStats(newStats);
+    triggerConfetti();
+  };
+
+  // Overall Class-based Attendance Calculation
   let totalAttended = 0;
   let totalConducted = 0;
   Object.keys(SUBJECTS).forEach((key) => {
@@ -186,7 +220,7 @@ export function App() {
 
   return (
     <div className="min-h-[100dvh] bg-zinc-950 text-zinc-100 flex flex-col font-sans">
-      {/* Top Navbar with Student Name and Registration Number */}
+      {/* Top Navbar with Student Name, Registration Number, and Working Days Indicator */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -197,6 +231,8 @@ export function App() {
         studentName={studentName}
         regNumber={regNumber}
         onOpenProfileModal={() => setIsProfileModalOpen(true)}
+        workingDaysData={workingDaysData}
+        onOpenWorkingDaysModal={() => setIsWorkingDaysModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -211,6 +247,8 @@ export function App() {
             onMarkAllToday={handleMarkAllToday}
             subjectStats={subjectStats}
             currentLiveDay={todayCode}
+            workingDaysData={workingDaysData}
+            onOpenWorkingDaysModal={() => setIsWorkingDaysModalOpen(true)}
           />
         )}
 
@@ -220,6 +258,8 @@ export function App() {
             attendanceRecords={attendanceRecords}
             onMarkPeriod={handleMarkPeriod}
             onMarkAllToday={handleMarkAllToday}
+            workingDaysData={workingDaysData}
+            onOpenWorkingDaysModal={() => setIsWorkingDaysModalOpen(true)}
           />
         )}
 
@@ -244,6 +284,16 @@ export function App() {
         userGroup={userGroup}
         setUserGroup={setUserGroup}
         onSave={handleSaveProfile}
+      />
+
+      {/* Working Days & Official Attendance Editor Modal */}
+      <WorkingDaysModal
+        isOpen={isWorkingDaysModalOpen}
+        onClose={() => setIsWorkingDaysModalOpen(false)}
+        workingDaysData={workingDaysData}
+        onSaveWorkingDays={handleSaveWorkingDays}
+        subjectStats={subjectStats}
+        onSaveSubjectStats={handleSaveSubjectStats}
       />
 
       {/* Footer */}
